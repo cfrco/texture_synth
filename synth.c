@@ -346,7 +346,7 @@ void synth(double *raw_red,double *raw_green,double *raw_blue,
     free(gauss);
 }
 
-void _pyramid(double *nr,double *ng,double *nb,int row,int col,int wsize,double *mask,
+void _pyramid(double *nr,double *ng,double *nb,int row,int col,int wsize,
               double *or,double *og,double *ob)
 {
     int orow = row/2, ocol = col/2,r,c,i;
@@ -355,6 +355,8 @@ void _pyramid(double *nr,double *ng,double *nb,int row,int col,int wsize,double 
     double *tmp_red   = (double*)malloc(wsize*wsize*sizeof(double));
     double *tmp_green = (double*)malloc(wsize*wsize*sizeof(double));
     double *tmp_blue  = (double*)malloc(wsize*wsize*sizeof(double));
+    double *mask      = (double*)malloc(wsize*wsize*sizeof(double));
+    gauss_kern(mask,wsize,1);
 
     double sr,sg,sb;
     
@@ -502,7 +504,6 @@ void synth_pyramid(double *raw_red,double *raw_green,double *raw_blue,
     outp[0][2] = new_blue;
     validp[0]  = valid;
 
-    double pmask[25];gauss_kern(pmask,5,1);
     int prow = raw_row,pcol = raw_col;
     int pnrow = new_row,pncol = new_col;
     for(i=1;i<level;++i){
@@ -516,9 +517,9 @@ void synth_pyramid(double *raw_red,double *raw_green,double *raw_blue,
         validp[i]  = (char*)malloc(sizeof(char)*(pnrow/2)*(pncol/2));
 
         //generate
-        _pyramid(rawp[i-1][0],rawp[i-1][1],rawp[i-1][2],prow,pcol,5,pmask,
+        _pyramid(rawp[i-1][0],rawp[i-1][1],rawp[i-1][2],prow,pcol,5,
                  rawp[i][0]  ,rawp[i][1]  ,rawp[i][2]);
-        _pyramid(outp[i-1][0],outp[i-1][1],outp[i-1][2],pnrow,pncol,5,pmask,
+        _pyramid(outp[i-1][0],outp[i-1][1],outp[i-1][2],pnrow,pncol,5,
                  outp[i][0]  ,outp[i][1]  ,outp[i][2]);
         _pyramidvalid(validp[i-1],pnrow,pncol,validp[i]);
 

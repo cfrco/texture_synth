@@ -4,31 +4,8 @@ Anthor : catcfrco (z82206.cat[at]gmail.com)
 import Image
 import numpy as np
 import ctypes
-from scipy import mgrid,ndimage
-    
+
 synth = ctypes.CDLL("./libsynth.so")
-
-def gauss_kern(size, sizey=None):
-    """ Returns a normalized 2D gauss kernel array for convolutions """
-    size = int(size)
-    if not sizey:
-        sizey = size
-    else:
-        sizey = int(sizey)
-    x, y = mgrid[-size:size+1, -sizey:sizey+1]
-    g = np.exp(-(x**2/float(size)+y**2/float(sizey)))
-    return g / g.max()
-
-def gauss_kern2(size, sizey=None):
-    """ Returns a normalized 2D gauss kernel array for convolutions """
-    size = int(size)
-    if not sizey:
-        sizey = size
-    else:
-        sizey = int(sizey)
-    x, y = mgrid[-size:size+1, -sizey:sizey+1]
-    g = np.exp(-(x**2/float(size)+y**2/float(sizey)))
-    return g / g.sum()
 
 def arr2rgb(imarr):
     r = imarr[:,:,0].astype(ctypes.c_double)
@@ -94,11 +71,7 @@ def cpyramid(arr,wsize=5):
     out_shape = (arr.shape[0]/2,arr.shape[1]/2)
     nr,ng,nb,nrp,ngp,nbp = allocrgb(out_shape)
     
-    gauss = gauss_kern2((wsize-1)/2).astype(ctypes.c_double)
-    pgauss = gauss.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-    
-    synth._pyramid(rp,gp,bp,arr.shape[0],arr.shape[1],wsize,pgauss,
-                   nrp,ngp,nbp)
+    synth._pyramid(rp,gp,bp,arr.shape[0],arr.shape[1],wsize,nrp,ngp,nbp)
     
     out = np.ndarray((out_shape[0],out_shape[1],3),dtype=np.uint8)
     out[:,:,0] = nr.astype(np.uint8)
@@ -122,12 +95,12 @@ def texture_synth_pyramid(arr,out_shape,wsize,psize,level,err=0.2):
     return out
 
 if __name__ == "__main__":
-    a = opensample("D1.jpg")
+    #a = opensample("D1.jpg")
     #res = texture_synth_pyramid(a,(200,200),3,3,3)
     #Image.fromarray(res).show()
 
-    res = texture_synth(a,(100,100),17,3)
-    Image.fromarray(res).show()
+    #res = texture_synth(a,(100,100),17,3)
+    #Image.fromarray(res).show()
 
     """
     res = texture_synth(a,(200,200),3,3)
