@@ -57,18 +57,15 @@ mods = {
     "random"   : 1,
     "counting" : 2,
 }
-def texture_synth(sample,out_shape,wsize,psize,mod="random"):
+def texture_synth(sample,out_shape,wsize,psize,err=0.1,mod="random"):
     if not mod in mods :
         return None
 
     r,g,b,rp,gp,bp = arr2rgb(sample)
     nr,ng,nb,nrp,ngp,nbp = allocrgb(out_shape)
     
-    gauss = gauss_kern((wsize-1)/2).astype(ctypes.c_double)
-    pgauss = gauss.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-    
     synth.synth(rp,gp,bp,a.shape[0],a.shape[1],nrp,ngp,nbp,
-                out_shape[0],out_shape[1],wsize,psize,pgauss,mods[mod])
+                out_shape[0],out_shape[1],wsize,psize,ctypes.c_double(err),mods[mod])
     
     out = np.ndarray((out_shape[0],out_shape[1],3),dtype=np.uint8)
     out[:,:,0] = nr.astype(np.uint8)
@@ -110,15 +107,12 @@ def cpyramid(arr,wsize=5):
 
     return out
 
-def texture_synth_pyramid(arr,out_shape,wsize,psize,level):
+def texture_synth_pyramid(arr,out_shape,wsize,psize,level,err=0.2):
     r,g,b,rp,gp,bp = arr2rgb(arr)
     nr,ng,nb,nrp,ngp,nbp = allocrgb(out_shape)
     
-    gauss = gauss_kern((wsize-1)/2).astype(ctypes.c_double)
-    pgauss = gauss.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-    
     synth.synth_pyramid(rp,gp,bp,a.shape[0],a.shape[1],nrp,ngp,nbp,
-                        out_shape[0],out_shape[1],wsize,psize,pgauss,level)
+                        out_shape[0],out_shape[1],wsize,psize,ctypes.c_double(err),level)
     
     out = np.ndarray((out_shape[0],out_shape[1],3),dtype=np.uint8)
     out[:,:,0] = nr.astype(np.uint8)

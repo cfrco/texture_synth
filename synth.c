@@ -261,6 +261,7 @@ int find_best_match(double *raw_red,double *raw_green,double *raw_blue,
     
     r = list_lessthan(ssd_list,ssd_list[min_ind]*(1+err),p+1,index_list);
     if(mod == 1) return index_list[rand()%r];
+    
     // mod == 2
     r = maxcount(index_list,ssd_list,r,count_list);
     return index_list[r];
@@ -269,7 +270,7 @@ int find_best_match(double *raw_red,double *raw_green,double *raw_blue,
 void synth(double *raw_red,double *raw_green,double *raw_blue,
            int raw_row,int raw_col,
            double *new_red,double *new_green,double *new_blue,
-           int new_row,int new_col,int wsize,int psize,double *gauss,int mod)
+           int new_row,int new_col,int wsize,int psize,double err,int mod)
 {
     int i,j;
     int hwsize = (wsize-1)/2,npixels = new_row*new_col;
@@ -293,6 +294,8 @@ void synth(double *raw_red,double *raw_green,double *raw_blue,
     int *index_list   = (int*)malloc(raw_row*raw_col*sizeof(int));
     int *count_list   = (int*)malloc(raw_row*raw_col*sizeof(int));
     int *valid_list   = (int*)malloc(100*sizeof(int)); // for getunfilled2
+    double *gauss     = (double*)malloc(wsize*wsize*sizeof(double));
+    gauss_kern(gauss,wsize,1);
 
     //put patch
     int r = rand()%(raw_row-psize)+psize/2,c = rand()%(raw_col-psize)+psize/2;
@@ -317,7 +320,7 @@ void synth(double *raw_red,double *raw_green,double *raw_blue,
             mask[i] = gauss[i]*validmask[i];
 
         int best = find_best_match(raw_red,raw_green,raw_blue,raw_row,raw_col,
-                                   tmp_red,tmp_green,tmp_blue,wsize,mask,0.1,
+                                   tmp_red,tmp_green,tmp_blue,wsize,mask,err,
                                    index_list,ssd_list,count_list,mod);
         //set filled
         valid[r*new_col+c] = 1;
@@ -340,6 +343,7 @@ void synth(double *raw_red,double *raw_green,double *raw_blue,
     free(index_list);
     free(count_list);
     free(valid_list);
+    free(gauss);
 }
 
 void _pyramid(double *nr,double *ng,double *nb,int row,int col,int wsize,double *mask,
@@ -451,7 +455,7 @@ int pyramid_find_best_match(double *(*rawp)[3],int raw_row,int raw_col,int level
 void synth_pyramid(double *raw_red,double *raw_green,double *raw_blue,
                    int raw_row,int raw_col,
                    double *new_red,double *new_green,double *new_blue,
-                   int new_row,int new_col,int wsize,int psize,double *gauss,int level)
+                   int new_row,int new_col,int wsize,int psize,double err,int level)
 {
     int i,j;
     int hwsize = (wsize-1)/2,npixels = new_row*new_col;
@@ -474,11 +478,13 @@ void synth_pyramid(double *raw_red,double *raw_green,double *raw_blue,
     double *ssd_list  = (double*)malloc(raw_row*raw_col*sizeof(double));
     int *index_list   = (int*)malloc(raw_row*raw_col*sizeof(int));
     int *count_list   = (int*)malloc(raw_row*raw_col*sizeof(int));
-    int *valid_list    = (int*)malloc(100*sizeof(int)); // for getunfilled2
+    int *valid_list   = (int*)malloc(100*sizeof(int)); // for getunfilled2
+    double *gauss     = (double*)malloc(wsize*wsize*sizeof(double));
+    gauss_kern(gauss,wsize,1);
 
     double *(*rawp)[3] = (double *(*)[3]) malloc(sizeof(double*)*(level+1)*3);
     double *(*outp)[3] = (double *(*)[3]) malloc(sizeof(double*)*level*3);
-    char *(*validp)  = (char *(*)) malloc(sizeof(char*)*level);
+    char *(*validp)    = (char *(*)) malloc(sizeof(char*)*level);
 
     //put patch
     int r = rand()%(raw_row-psize)+psize/2,c = rand()%(raw_col-psize)+psize/2;
@@ -528,9 +534,8 @@ void synth_pyramid(double *raw_red,double *raw_green,double *raw_blue,
     memset(rawp[level][1],0,sizeof(double)*prow*pcol);
     memset(rawp[level][2],0,sizeof(double)*prow*pcol);
 
-    
-    int target,now;
     //synth for each level
+    int target,now;
     for(i=level-1;i>=0;--i){
         int trow = raw_row/(1<<i),tcol = raw_col/(1<<i);
         int tnrow = new_row/(1<<i),tncol = new_col/(1<<i);
@@ -568,7 +573,7 @@ void synth_pyramid(double *raw_red,double *raw_green,double *raw_blue,
 
             int best = pyramid_find_best_match(rawp,trow,tcol,i,
                                                tmp_red,tmp_green,tmp_blue,
-                                               wsize,mask,0.2,
+                                               wsize,mask,err,
                                                index_list,ssd_list,count_list,0);
             //set filled
             validp[i][r*tncol+c] = 1;
@@ -591,6 +596,7 @@ void synth_pyramid(double *raw_red,double *raw_green,double *raw_blue,
     free(ssd_list);
     free(index_list);
     free(count_list);
+    free(gauss);
 
     for(i=1;i<level;++i){
         free(rawp[i][0]);
