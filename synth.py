@@ -41,7 +41,7 @@ def texture_synth(sample,out_shape,wsize,psize,err=0.1,mod="random"):
     r,g,b,rp,gp,bp = arr2rgb(sample)
     nr,ng,nb,nrp,ngp,nbp = allocrgb(out_shape)
     
-    synth.synth(rp,gp,bp,a.shape[0],a.shape[1],nrp,ngp,nbp,
+    synth.synth(rp,gp,bp,sample.shape[0],sample.shape[1],nrp,ngp,nbp,
                 out_shape[0],out_shape[1],wsize,psize,ctypes.c_double(err),mods[mod])
     
     out = np.ndarray((out_shape[0],out_shape[1],3),dtype=np.uint8)
@@ -80,11 +80,11 @@ def cpyramid(arr,wsize=5):
 
     return out
 
-def texture_synth_pyramid(arr,out_shape,wsize,psize,level,err=0.2):
-    r,g,b,rp,gp,bp = arr2rgb(arr)
+def texture_synth_pyramid(sample,out_shape,wsize,psize,level,err=0.2):
+    r,g,b,rp,gp,bp = arr2rgb(sample)
     nr,ng,nb,nrp,ngp,nbp = allocrgb(out_shape)
     
-    synth.synth_pyramid(rp,gp,bp,a.shape[0],a.shape[1],nrp,ngp,nbp,
+    synth.synth_pyramid(rp,gp,bp,sample.shape[0],sample.shape[1],nrp,ngp,nbp,
                         out_shape[0],out_shape[1],wsize,psize,ctypes.c_double(err),level)
     
     out = np.ndarray((out_shape[0],out_shape[1],3),dtype=np.uint8)
@@ -94,22 +94,3 @@ def texture_synth_pyramid(arr,out_shape,wsize,psize,level,err=0.2):
 
     return out
 
-if __name__ == "__main__":
-    #a = opensample("D1.jpg")
-    #res = texture_synth_pyramid(a,(200,200),3,3,3)
-    #Image.fromarray(res).show()
-
-    #res = texture_synth(a,(100,100),17,3)
-    #Image.fromarray(res).show()
-
-    """
-    res = texture_synth(a,(200,200),3,3)
-    Image.fromarray(res).save("rand_out3x3_1.jpg",quality=100)
-    print "done"
-    res = texture_synth(a,(200,200),3,3)
-    Image.fromarray(res).save("rand_out3x3_2.jpg",quality=100)
-    print "done"
-    res = texture_synth(a,(200,200),3,3)
-    Image.fromarray(res).save("rand_out3x3_3.jpg",quality=100)
-    print "done"
-    """
