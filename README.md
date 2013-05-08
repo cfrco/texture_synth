@@ -5,10 +5,8 @@ The code and Algorithms may not correct.
 
 Compile
 ---------
-<code>
-$ gcc -O3 -c -fPIC synth.c -o synth.o  
-$ gcc -shared -Wl,-soname,libsynth.so.1 -o libsynth.so synth.o  
-</code>
+<pre><code>$ gcc -O3 -c -fPIC synth.c -o synth.o
+$ gcc -shared -Wl,-soname,libsynth.so.1 -o libsynth.so synth.o</code></pre>
 
 Reference
 ---------
