@@ -295,7 +295,8 @@ void synth(double *raw_red,double *raw_green,double *raw_blue,
     int *count_list   = (int*)malloc(raw_row*raw_col*sizeof(int));
     int *valid_list   = (int*)malloc(100*sizeof(int)); // for getunfilled2
     double *gauss     = (double*)malloc(wsize*wsize*sizeof(double));
-    gauss_kern(gauss,wsize,1);
+    //gauss_kern(gauss,wsize,1);
+    gauss_kern(gauss,wsize,wsize/6.4);
 
     //put patch
     int r = rand()%(raw_row-psize)+psize/2,c = rand()%(raw_col-psize)+psize/2;
