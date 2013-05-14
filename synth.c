@@ -201,7 +201,8 @@ int maxcount(int *indlist,double *ssdlist,int len,int *countlist)
         if(countlist[i]==-1) continue;
 
         for(j=i+1;j<len;++j){
-            d = countlist[i] - countlist[j]; 
+            if(countlist[j]==-1) continue;
+            d = ssdlist[i] - ssdlist[j]; 
             d *= d;
 
             if(d < 100){
